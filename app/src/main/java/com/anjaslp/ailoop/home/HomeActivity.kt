@@ -15,7 +15,6 @@ import com.google.firebase.auth.FirebaseAuth
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var textFullName: TextView
-    private lateinit var textEmail: TextView
 
     val firebaseAuth = FirebaseAuth.getInstance()
 
@@ -26,7 +25,8 @@ class HomeActivity : AppCompatActivity() {
 
         val firebaseUser = firebaseAuth.currentUser
         if (firebaseUser!=null){
-            textFullName.text = firebaseUser.displayName
+            val greetingMessage = "Hi, ${firebaseUser.displayName}"
+            textFullName.text = greetingMessage
         }else{
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
