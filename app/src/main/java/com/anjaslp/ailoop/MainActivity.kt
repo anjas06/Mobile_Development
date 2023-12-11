@@ -7,16 +7,14 @@ import com.anjaslp.ailoop.databinding.ActivityMainBinding
 import com.anjaslp.ailoop.home.HomeActivity
 import com.anjaslp.ailoop.login.LoginActivity
 import com.anjaslp.ailoop.register.RegisterActivity
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
-    val firebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onStart() {
         super.onStart()
-        if (firebaseAuth.currentUser != null) {
+        if (mainViewModel.isUserLoggedIn()) {
             startActivity(Intent(this, HomeActivity::class.java))
         }
     }
@@ -25,6 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        mainViewModel = MainViewModel()
 
         binding.btLogin.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
@@ -35,5 +35,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
     }
 }

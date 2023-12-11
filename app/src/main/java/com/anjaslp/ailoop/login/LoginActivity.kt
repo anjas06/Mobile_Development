@@ -1,11 +1,13 @@
 package com.anjaslp.ailoop.login
 
+import LoginViewModel
 import android.app.ProgressDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.lifecycle.ViewModelProvider
 import com.anjaslp.ailoop.R
 import com.anjaslp.ailoop.databinding.ActivityLoginBinding
 import com.anjaslp.ailoop.databinding.ActivityMainBinding
@@ -17,13 +19,11 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var progressDialog: ProgressDialog
-    var firebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var loginViewModel: LoginViewModel
 
     override fun onStart() {
         super.onStart()
-        if (firebaseAuth.currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-        }
+        loginViewModel.checkUserLoggedIn()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,29 +35,28 @@ class LoginActivity : AppCompatActivity() {
         progressDialog.setTitle("Logging")
         progressDialog.setMessage("Silahkan tunggu...")
 
-        binding.btLogin.setOnClickListener {
-            if (binding.editEmail.text.isNotEmpty() && binding.editPassword.text.isNotEmpty()) {
-                processLogin()
-            }else{
-                Toast.makeText(this, "Silahkan isi Email dan Password terlebih dahulu", LENGTH_SHORT).show()
-            }
-        }
-    }
+        loginViewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
 
-    private fun processLogin(){
-        val email = binding.editEmail.text.toString()
-        val password = binding.editPassword.text.toString()
-
-        progressDialog.show()
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
+        loginViewModel.loginResult.observe(this, { loggedIn ->
+            if (loggedIn) {
                 startActivity(Intent(this, HomeActivity::class.java))
             }
-            .addOnFailureListener{ error ->
-                Toast.makeText(this, error.localizedMessage, LENGTH_SHORT).show()
+        })
+
+        loginViewModel.errorMessage.observe(this, { error ->
+            progressDialog.dismiss()
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+        })
+
+        binding.btLogin.setOnClickListener {
+            if (binding.editEmail.text.isNotEmpty() && binding.editPassword.text.isNotEmpty()) {
+                val email = binding.editEmail.text.toString()
+                val password = binding.editPassword.text.toString()
+                loginViewModel.login(email, password)
+                progressDialog.show()
+            } else {
+                Toast.makeText(this, "Silahkan isi Email dan Password terlebih dahulu", Toast.LENGTH_SHORT).show()
             }
-            .addOnCompleteListener{
-                progressDialog.dismiss()
-            }
+        }
     }
 }

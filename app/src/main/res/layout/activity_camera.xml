@@ -5,34 +5,81 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".CameraActivity">
+    tools:context=".camera.CameraActivity">
 
     <ImageView
         android:id="@+id/imageResult"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="70dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp"
         android:src="@drawable/placeholder_image"
         android:scaleType="fitXY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btTake"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="64dp"
-        android:background="@drawable/bg_button2"
-        android:text="Take a Picture"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageResult">
+
+        <Button
+            android:id="@+id/btTake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button2"
+            android:text="Camera"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageResult" />
+
+        <Button
+            android:id="@+id/btGallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button2"
+            android:text="Gallery"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@+id/btTake"
+            app:layout_constraintTop_toBottomOf="@+id/imageResult" />
+
+        <Button
+            android:id="@+id/btPredict"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_button2"
+            android:text="Predict"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btGallery"
+            app:layout_constraintTop_toBottomOf="@+id/imageResult" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Terdeteksi terkena malaria atau tidak"
         android:textSize="24sp"
+        android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageResult" />
+        app:layout_constraintTop_toBottomOf="@+id/linearButton" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout2"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -43,13 +90,12 @@
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:backgroundTint="@color/blue"
             android:layout_gravity="bottom"
+            android:backgroundTint="@color/blue"
 
             app:fabCradleMargin="8dp"
             app:fabCradleRoundedCornerRadius="50dp"
-            app:fabCradleVerticalOffset="6dp"
-            >
+            app:fabCradleVerticalOffset="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"

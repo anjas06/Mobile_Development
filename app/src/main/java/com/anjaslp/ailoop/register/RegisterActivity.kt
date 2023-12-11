@@ -1,11 +1,13 @@
 package com.anjaslp.ailoop.register
 
+import RegisterViewModel
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.anjaslp.ailoop.databinding.ActivityRegisterBinding
 import com.anjaslp.ailoop.home.HomeActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -15,13 +17,11 @@ class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var progressDialog: ProgressDialog
-    var firebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var registerViewModel: RegisterViewModel
 
     override fun onStart() {
         super.onStart()
-        if (firebaseAuth.currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-        }
+        registerViewModel.checkUserLoggedIn()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,47 +33,32 @@ class RegisterActivity : AppCompatActivity() {
         progressDialog.setTitle("Logging")
         progressDialog.setMessage("Silahkan tunggu...")
 
+        registerViewModel = ViewModelProvider(this).get(RegisterViewModel::class.java)
+
+        registerViewModel.registrationResult.observe(this, { registered ->
+            if (registered) {
+                startActivity(Intent(this, HomeActivity::class.java))
+            }
+        })
+
+        registerViewModel.errorMessage.observe(this, { error ->
+            progressDialog.dismiss()
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+        })
+
         binding.btSignup.setOnClickListener {
             if (binding.editName.text.isNotEmpty()
                 && binding.editEmail.text.isNotEmpty()
                 && binding.editPassword.text.isNotEmpty()
             ) {
-                //LAUNCH REGISTER
-                progressRegister()
+                val fullName = binding.editName.text.toString()
+                val email = binding.editEmail.text.toString()
+                val password = binding.editPassword.text.toString()
+                registerViewModel.register(fullName, email, password)
+                progressDialog.show()
             } else {
-                Toast.makeText(this, "Silahkan isi dulu semua data", LENGTH_SHORT).show()
+                Toast.makeText(this, "Silahkan isi dulu semua data", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun progressRegister() {
-        val fullName = binding.editName.text.toString()
-        val email = binding.editEmail.text.toString()
-        val password = binding.editPassword.text.toString()
-
-        progressDialog.show()
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val userUpdateProfil = userProfileChangeRequest {
-                        displayName = fullName
-                    }
-                    val user = task.result.user
-                    user!!.updateProfile(userUpdateProfil)
-                        .addOnCompleteListener {
-                            progressDialog.dismiss()
-                            startActivity(Intent(this, HomeActivity::class.java))
-                        }
-                        .addOnFailureListener{ error2 ->
-                            Toast.makeText(this, error2.localizedMessage, LENGTH_SHORT).show()
-                        }
-                }else{
-                    progressDialog.dismiss()
-                //    Toast.makeText(this, "Pendaftaran Gagal!", LENGTH_SHORT).show()
-                }
-            }
-            .addOnFailureListener { error ->
-                Toast.makeText(this, error.localizedMessage, LENGTH_SHORT).show()
-            }
     }
 }

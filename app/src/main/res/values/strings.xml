@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AiLOOP</string>
+    <string name="app_name">Decma</string>
     <string name="login">Login</string>
     <string name="welcome_to_ailoop">Welcome To AiLOOP</string>
     <string name="sign_up">Sign Up</string>
@@ -17,4 +17,5 @@
         dan lemas sebelum suhu tubuh kembali normal.</string>
     <string name="home">Home</string>
     <string name="name">Name</string>
+    <string name="logo">Logo Aplikasi</string>
 </resources>
