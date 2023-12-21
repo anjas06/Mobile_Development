@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Decma</string>
     <string name="login">Login</string>
-    <string name="welcome_to_ailoop">Welcome To AiLOOP</string>
+    <string name="welcome_to_ailoop">Welcome To DecMa App</string>
     <string name="sign_up">Sign Up</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

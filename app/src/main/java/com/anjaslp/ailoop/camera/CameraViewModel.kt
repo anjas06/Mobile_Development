@@ -15,6 +15,9 @@ class CameraViewModel : ViewModel() {
     val imageResult: MutableLiveData<Bitmap?> = MutableLiveData()
     val cameraPermissionGranted: MutableLiveData<Boolean> = MutableLiveData()
 
+    fun getImageBitmap(): Bitmap? {
+        return imageResult.value
+    }
     fun checkCameraPermission(activity: AppCompatActivity) {
         val cameraPermission =
             ContextCompat.checkSelfPermission(

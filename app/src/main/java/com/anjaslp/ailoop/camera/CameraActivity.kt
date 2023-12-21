@@ -17,12 +17,19 @@ import androidx.lifecycle.ViewModelProvider
 import com.anjaslp.ailoop.R
 import com.anjaslp.ailoop.databinding.ActivityCameraBinding
 import com.anjaslp.ailoop.home.HomeActivity
+import com.anjaslp.ailoop.ml.ConvertedModel
 import com.anjaslp.ailoop.profile.ProfileActivity
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class CameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCameraBinding
     private lateinit var cameraViewModel: CameraViewModel
+    private val imageSize = 224
     private var backButtonPressedOnce = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +56,64 @@ class CameraActivity : AppCompatActivity() {
             cameraViewModel.pickFromGallery(this)
         }
 
+        binding.btPredict.setOnClickListener {
+            // Memanggil fungsi classifyImage ketika tombol btPredict ditekan
+            val imageBitmap = cameraViewModel.getImageBitmap()
+            if (imageBitmap != null) {
+                classifyImage(imageBitmap)
+            }else {
+                // Handle case when imageBitmap is null (not selected yet or some other issue)
+                Toast.makeText(this, "Please select an image first", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         setupBottomAppBar()
+    }
+
+    private fun classifyImage(image: Bitmap) {
+        try {
+            val model = ConvertedModel.newInstance(applicationContext)
+
+            val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
+            val byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3)
+            byteBuffer.order(ByteOrder.nativeOrder())
+
+            val intValues = IntArray(imageSize * imageSize)
+            image.getPixels(intValues, 0, image.width, 0, 0, image.width, image.height)
+
+            var pixel = 0
+            for (i in 0 until imageSize) {
+                for (j in 0 until imageSize) {
+                    val `val` = intValues[pixel++]
+                    byteBuffer.putFloat(((`val` shr 16 and 0xFF) * (1f / 255f)).toFloat())
+                    byteBuffer.putFloat(((`val` shr 8 and 0xFF) * (1f / 255f)).toFloat())
+                    byteBuffer.putFloat((`val` and (0xFF * (1f / 255f)).toInt()).toFloat())
+                }
+            }
+
+            inputFeature0.loadBuffer(byteBuffer)
+
+            val outputs = model.process(inputFeature0)
+            val outputFeature0 = outputs.getOutputFeature0AsTensorBuffer()
+
+            val confidence = outputFeature0.floatArray
+
+            var maxPos = 0
+            var maxConfidence = 0f
+            for (i in confidence.indices) {
+                if (confidence[i] > maxConfidence) {
+                    maxConfidence = confidence[i]
+                    maxPos = i
+                }
+            }
+
+            val classes = arrayOf("No Malaria Detected", "Malaria detected")
+            binding.tvResult.text = classes[maxPos]
+
+            model.close()
+        } catch (e: IOException) {
+            // TODO Handle the exception
+        }
     }
 
     override fun onBackPressed() {
